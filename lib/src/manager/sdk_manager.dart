@@ -1,23 +1,28 @@
 import 'dart:convert';
 import 'package:fixnum/fixnum.dart';
 import 'package:im_lite_core_flutter/im_lite_core_flutter.dart';
+import 'package:im_lite_sdk_flutter/src/constant/content_type.dart';
 import 'package:im_lite_sdk_flutter/src/constant/send_status.dart';
 import 'package:im_lite_sdk_flutter/src/listener/conv_listener.dart';
 import 'package:im_lite_sdk_flutter/src/listener/msg_listener.dart';
 import 'package:im_lite_sdk_flutter/src/listener/unread_count_listener.dart';
 import 'package:im_lite_sdk_flutter/src/model/conv_model.dart';
 import 'package:im_lite_sdk_flutter/src/model/msg_model.dart';
+import 'package:im_lite_sdk_flutter/src/model/record_model.dart';
+import 'package:im_lite_sdk_flutter/src/model/sdk_content.dart';
 import 'package:im_lite_sdk_flutter/src/tool/sdk_tool.dart';
 import 'package:isar/isar.dart';
 
 class SDKManager {
+  final int pullMsgCount;
   final bool isarInspector;
   final ConvListener? convListener;
   final MsgListener? msgListener;
   final UnreadCountListener? unreadCountListener;
 
   SDKManager({
-    this.isarInspector = false,
+    required this.pullMsgCount,
+    required this.isarInspector,
     this.convListener,
     this.msgListener,
     this.unreadCountListener,
@@ -56,22 +61,24 @@ class SDKManager {
     return isar.msgModels;
   }
 
+  /// 记录表
+  IsarCollection<RecordModel> recordModels() {
+    return isar.recordModels;
+  }
+
   /// 拉取会话
   void pullConv(ConvDataList? convList) async {
     if (convList == null) return;
     List<PullMsg> pullList = [];
     await isar.writeTxn((isar) async {
-      List<ConvModel> list = await convModels().where().findAll();
+      List<ConvModel> convModelList = await convModels().where().findAll();
       for (ConvData conv in convList.list) {
-        list.removeWhere((item) {
-          return item.convID == conv.convID;
-        });
-        PullMsg? pull = await _handleConv(conv);
+        PullMsg? pull = await _handleConv(convModelList, conv);
         if (pull != null) pullList.add(pull);
       }
-      for (ConvModel convModel in list) {
+      for (ConvModel convModel in convModelList) {
         await convModels().delete(convModel.id!);
-        await msgModels().filter().idEqualTo(convModel.id!).deleteAll();
+        await msgModels().filter().convIDEqualTo(convModel.convID).deleteAll();
       }
       convListener?.update();
       await _calculateUnreadCount();
@@ -86,21 +93,25 @@ class SDKManager {
   }
 
   /// 处理会话
-  Future<PullMsg?> _handleConv(ConvData conv) async {
-    ConvModel? convModel = await convModels()
-        .filter()
-        .convIDEqualTo(
-          conv.convID,
-        )
-        .findFirst();
+  Future<PullMsg?> _handleConv(
+    List<ConvModel> convModelList,
+    ConvData conv,
+  ) async {
+    int index = convModelList.indexWhere((item) {
+      return item.convID == conv.convID;
+    });
+    ConvModel? convModel;
+    if (index != -1) {
+      convModel = convModelList.removeAt(index);
+    }
     if (convModel != null) {
       convModel.maxSeq = conv.maxSeq;
       convModel.minSeq = conv.minSeq;
-      convModel.unreadCount = conv.unreadCount;
     } else {
       convModel = ConvModel.fromProtobuf(conv);
     }
     await convModels().put(convModel);
+    int maxSeq = convModel.maxSeq;
     int minSeq = convModel.minSeq;
     MsgModel? msgModel = await msgModels()
         .filter()
@@ -109,13 +120,13 @@ class SDKManager {
         )
         .sortBySeqDesc()
         .findFirst();
-    if (msgModel != null && msgModel.seq != null) {
-      minSeq = msgModel.seq!;
+    if (msgModel != null && msgModel.seq != 0) {
+      minSeq = msgModel.seq;
     }
-    List<int> seqList = SDKTool.generateSeqList(
-      convModel.maxSeq,
-      minSeq,
-    );
+    if (maxSeq - minSeq > pullMsgCount) {
+      minSeq = maxSeq - pullMsgCount;
+    }
+    List<int> seqList = SDKTool.generateSeqList(maxSeq, minSeq);
     if (seqList.isNotEmpty) {
       return PullMsg(
         convID: convModel.convID,
@@ -146,6 +157,7 @@ class SDKManager {
   Future _handleMsg(MsgData msg) async {
     if (msg.serverMsgID.isEmpty) return;
     MsgModel msgModel = MsgModel.fromProtobuf(msg);
+    msgModel.sendStatus = SendStatus.success;
     MsgOptionsModel msgOptions = msgModel.msgOptions;
     bool storage = msgOptions.storage;
     bool unread = msgOptions.unread;
@@ -157,39 +169,70 @@ class SDKManager {
           )
           .findFirst();
       if (model != null) {
-        model.serverMsgID = msgModel.serverMsgID;
-        model.contentType = msgModel.contentType;
-        model.content = msgModel.content;
-        model.serverTime = msgModel.serverTime;
-        model.seq = msgModel.seq;
-        await msgModels().put(model);
+        if (model.seq != 0) {
+          if (msgModel.seq > model.seq) {
+            model.contentType = msgModel.contentType;
+            model.content = msgModel.content;
+            await msgModels().put(model);
+          }
+        } else {
+          model.serverMsgID = msgModel.serverMsgID;
+          model.contentType = msgModel.contentType;
+          model.content = msgModel.content;
+          model.seq = msgModel.seq;
+          model.serverTime = msgModel.serverTime;
+          await msgModels().put(model);
+        }
       } else {
-        msgModel.sendStatus = SendStatus.success;
         await msgModels().put(msgModel);
       }
     }
-    if (storage || unread) {
-      ConvModel? convModel = await convModels()
+    msgListener?.receive(msgModel);
+    RecordModel? recordModel;
+    if (msgModel.contentType == ContentType.read) {
+      ReadContent content = ReadContent.fromJson(msgModel.content);
+      recordModel = await recordModels()
           .filter()
-          .convIDEqualTo(
-            msgModel.convID,
-          )
+          .senderIDEqualTo(msgModel.senderID)
+          .convIDEqualTo(msgModel.convID)
           .findFirst();
-      if (convModel != null) {
-        if (storage) {
-          convModel.maxSeq = msgModel.seq!;
-          convModel.msgModel = msgModel;
-          convModel.msgTime = msgModel.serverTime;
+      if (recordModel != null) {
+        if (content.seq > recordModel.seq) {
+          recordModel.seq = content.seq;
+          await recordModels().put(recordModel);
         }
-        if (unread && msgModel.senderID != userID) {
-          convModel.unreadCount = ++convModel.unreadCount;
-        }
-        await convModels().put(convModel);
-        convListener?.update();
+      } else {
+        recordModel = RecordModel(
+          senderID: msgModel.senderID,
+          convID: msgModel.convID,
+          seq: content.seq,
+        );
+        await recordModels().put(recordModel);
       }
     }
-    msgListener?.receive(msgModel);
-    await _calculateUnreadCount();
+    ConvModel? convModel = await convModels()
+        .filter()
+        .convIDEqualTo(
+          msgModel.convID,
+        )
+        .findFirst();
+    if (convModel != null) {
+      convModel.maxSeq = msgModel.seq;
+      if (msgModel.contentType >= ContentType.text) {
+        convModel.msgModel = msgModel;
+        convModel.msgTime = msgModel.serverTime;
+      }
+      if (recordModel != null) {
+        int unreadCount = convModel.maxSeq - recordModel.seq;
+        convModel.unreadCount = unreadCount > 0 ? unreadCount : 0;
+      }
+      if (unread && msgModel.senderID != userID) {
+        convModel.unreadCount = ++convModel.unreadCount;
+      }
+      await convModels().put(convModel);
+      convListener?.update();
+      await _calculateUnreadCount();
+    }
   }
 
   /// 计算未读数量
@@ -200,16 +243,16 @@ class SDKManager {
 
   /// 创建消息
   MsgModel createMsg({
+    String? clientMsgID,
     required String convID,
     required int contentType,
     required String content,
     required OfflinePushModel offlinePush,
     required MsgOptionsModel msgOptions,
   }) {
-    String clientMsgID = SDKTool.getClientMsgID();
     int timestamp = DateTime.now().millisecondsSinceEpoch;
     MsgModel msgModel = MsgModel(
-      clientMsgID: clientMsgID,
+      clientMsgID: clientMsgID ?? SDKTool.getClientMsgID(),
       senderID: userID,
       convID: convID,
       contentType: contentType,
@@ -242,6 +285,7 @@ class SDKManager {
           convModel.msgModel = msgModel;
           convModel.msgTime = msgModel.serverTime;
           await convModels().put(convModel);
+          convListener?.update();
         }
       });
     }
@@ -282,6 +326,42 @@ class SDKManager {
             await msgModels().put(msgModel);
           });
         }
+        if (onError != null) onError();
+      },
+    );
+  }
+
+  /// 更新消息
+  void updateMsg({
+    required MsgModel msgModel,
+    Function()? onSuccess,
+    Function()? onError,
+  }) {
+    IMLiteCore.instance.sendMsg(
+      msg: MsgData(
+        clientMsgID: msgModel.clientMsgID,
+        senderID: userID,
+        convID: msgModel.convID,
+        contentType: msgModel.contentType,
+        content: utf8.encode(msgModel.content),
+        clientTime: Int64(msgModel.clientTime),
+        offlinePush: OfflinePush(
+          title: msgModel.offlinePush.title,
+          desc: msgModel.offlinePush.desc,
+          ex: msgModel.offlinePush.ex,
+          iOSPushSound: msgModel.offlinePush.iOSPushSound,
+          iOSBadgeCount: msgModel.offlinePush.iOSBadgeCount,
+          userIDs: msgModel.offlinePush.userIDs,
+        ),
+        msgOptions: MsgOptions(
+          storage: msgModel.msgOptions.storage,
+          unread: msgModel.msgOptions.unread,
+        ),
+      ),
+      onSuccess: (data) async {
+        if (onSuccess != null) onSuccess();
+      },
+      onError: (error) async {
         if (onError != null) onError();
       },
     );

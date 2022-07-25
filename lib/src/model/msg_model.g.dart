@@ -166,7 +166,7 @@ MsgModel _msgModelDeserializeNative(IsarCollection<MsgModel> collection, int id,
         _msgModelOfflinePushConverter.fromIsar(reader.readString(offsets[6])),
     sendStatus: reader.readLong(offsets[7]),
     senderID: reader.readString(offsets[8]),
-    seq: reader.readLongOrNull(offsets[9]),
+    seq: reader.readLong(offsets[9]),
     serverMsgID: reader.readStringOrNull(offsets[10]),
     serverTime: reader.readLong(offsets[11]),
   );
@@ -200,7 +200,7 @@ P _msgModelDeserializePropNative<P>(
     case 8:
       return (reader.readString(offset)) as P;
     case 9:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 10:
       return (reader.readStringOrNull(offset)) as P;
     case 11:
@@ -248,7 +248,7 @@ MsgModel _msgModelDeserializeWeb(
     sendStatus:
         IsarNative.jsObjectGet(jsObj, 'sendStatus') ?? double.negativeInfinity,
     senderID: IsarNative.jsObjectGet(jsObj, 'senderID') ?? '',
-    seq: IsarNative.jsObjectGet(jsObj, 'seq'),
+    seq: IsarNative.jsObjectGet(jsObj, 'seq') ?? double.negativeInfinity,
     serverMsgID: IsarNative.jsObjectGet(jsObj, 'serverMsgID'),
     serverTime:
         IsarNative.jsObjectGet(jsObj, 'serverTime') ?? double.negativeInfinity,
@@ -285,7 +285,8 @@ P _msgModelDeserializePropWeb<P>(Object jsObj, String propertyName) {
     case 'senderID':
       return (IsarNative.jsObjectGet(jsObj, 'senderID') ?? '') as P;
     case 'seq':
-      return (IsarNative.jsObjectGet(jsObj, 'seq')) as P;
+      return (IsarNative.jsObjectGet(jsObj, 'seq') ?? double.negativeInfinity)
+          as P;
     case 'serverMsgID':
       return (IsarNative.jsObjectGet(jsObj, 'serverMsgID')) as P;
     case 'serverTime':
@@ -1408,16 +1409,8 @@ extension MsgModelQueryFilter
     ));
   }
 
-  QueryBuilder<MsgModel, MsgModel, QAfterFilterCondition> seqIsNull() {
-    return addFilterConditionInternal(FilterCondition(
-      type: ConditionType.isNull,
-      property: 'seq',
-      value: null,
-    ));
-  }
-
   QueryBuilder<MsgModel, MsgModel, QAfterFilterCondition> seqEqualTo(
-      int? value) {
+      int value) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
       property: 'seq',
@@ -1426,7 +1419,7 @@ extension MsgModelQueryFilter
   }
 
   QueryBuilder<MsgModel, MsgModel, QAfterFilterCondition> seqGreaterThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -1438,7 +1431,7 @@ extension MsgModelQueryFilter
   }
 
   QueryBuilder<MsgModel, MsgModel, QAfterFilterCondition> seqLessThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return addFilterConditionInternal(FilterCondition(
@@ -1450,8 +1443,8 @@ extension MsgModelQueryFilter
   }
 
   QueryBuilder<MsgModel, MsgModel, QAfterFilterCondition> seqBetween(
-    int? lower,
-    int? upper, {
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -1948,7 +1941,7 @@ extension MsgModelQueryProperty
     return addPropertyNameInternal('senderID');
   }
 
-  QueryBuilder<MsgModel, int?, QQueryOperations> seqProperty() {
+  QueryBuilder<MsgModel, int, QQueryOperations> seqProperty() {
     return addPropertyNameInternal('seq');
   }
 

@@ -26,6 +26,8 @@ class IMLiteSDK {
   void init({
     required String apiUrl,
     required String wsUrl,
+    Duration autoPullTime = const Duration(seconds: 30),
+    int pullMsgCount = 200,
     bool isarInspector = false,
     ConnectListener? connectListener,
     ConvListener? convListener,
@@ -33,6 +35,7 @@ class IMLiteSDK {
     UnreadCountListener? unreadCountListener,
   }) {
     _sdkManager = SDKManager(
+      pullMsgCount: pullMsgCount,
       isarInspector: isarInspector,
       convListener: convListener,
       msgListener: msgListener,
@@ -43,6 +46,7 @@ class IMLiteSDK {
     IMLiteCore.instance.init(
       apiUrl: apiUrl,
       wsUrl: wsUrl,
+      autoPullTime: autoPullTime,
       connectListener: connectListener,
       receiveConvListener: ReceiveConvListener(
         onPullConv: _sdkManager!.pullConv,

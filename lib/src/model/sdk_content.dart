@@ -42,25 +42,21 @@ class ReadContent {
 
 /// 撤回消息
 class RevokeContent {
-  String clientMsgID;
   String content;
 
   RevokeContent({
-    required this.clientMsgID,
     required this.content,
   });
 
   static RevokeContent fromJson(String content) {
     Map<String, dynamic> map = json.decode(content);
     return RevokeContent(
-      clientMsgID: map["clientMsgID"],
       content: map["content"],
     );
   }
 
   String toJson() {
     return json.encode({
-      "clientMsgID": clientMsgID,
       "content": content,
     });
   }

@@ -25,7 +25,7 @@ class MsgModel {
   String content;
   int clientTime;
   int serverTime;
-  int? seq;
+  int seq;
   @OfflinePushConverter()
   OfflinePushModel offlinePush;
   @MsgOptionsConverter()
@@ -41,7 +41,7 @@ class MsgModel {
     required this.content,
     required this.clientTime,
     required this.serverTime,
-    this.seq,
+    this.seq = 0,
     required this.offlinePush,
     required this.msgOptions,
     this.sendStatus = SendStatus.sending,

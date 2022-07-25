@@ -126,12 +126,14 @@ class MsgManager {
 
   /// 发送撤回消息
   void sendRevoke({
+    required String clientMsgID,
     required String convID,
     required RevokeContent content,
     Function()? onSuccess,
     Function()? onError,
   }) {
     MsgModel msgModel = _sdkManager.createMsg(
+      clientMsgID: clientMsgID,
       convID: convID,
       contentType: ContentType.revoke,
       content: content.toJson(),
@@ -144,7 +146,7 @@ class MsgManager {
         userIDs: [],
       ),
       msgOptions: MsgOptionsModel(
-        storage: false,
+        storage: true,
         unread: false,
       ),
     );

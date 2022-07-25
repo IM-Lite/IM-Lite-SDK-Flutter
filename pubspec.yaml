@@ -11,7 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  im_lite_core_flutter: ^1.0.1
+  im_lite_core_flutter:
+    git: https://github.com/IM-Lite/IM-Lite-Core-Flutter
   fixnum: ^1.0.1
   uuid: ^3.0.6
   isar: ^2.5.0
