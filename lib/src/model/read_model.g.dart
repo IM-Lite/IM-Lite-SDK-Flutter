@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'record_model.dart';
+part of 'read_model.dart';
 
 // **************************************************************************
 // IsarCollectionGenerator
@@ -8,14 +8,14 @@ part of 'record_model.dart';
 
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, unused_local_variable
 
-extension GetRecordModelCollection on Isar {
-  IsarCollection<RecordModel> get recordModels => getCollection();
+extension GetReadModelCollection on Isar {
+  IsarCollection<ReadModel> get readModels => getCollection();
 }
 
-const RecordModelSchema = CollectionSchema(
-  name: 'RecordModel',
+const ReadModelSchema = CollectionSchema(
+  name: 'ReadModel',
   schema:
-      '{"name":"RecordModel","idName":"id","properties":[{"name":"convID","type":"String"},{"name":"senderID","type":"String"},{"name":"seq","type":"Long"}],"indexes":[{"name":"convID","unique":false,"properties":[{"name":"convID","type":"Hash","caseSensitive":true}]},{"name":"senderID","unique":false,"properties":[{"name":"senderID","type":"Hash","caseSensitive":true}]}],"links":[]}',
+      '{"name":"ReadModel","idName":"id","properties":[{"name":"convID","type":"String"},{"name":"senderID","type":"String"},{"name":"seq","type":"Long"}],"indexes":[{"name":"convID","unique":false,"properties":[{"name":"convID","type":"Hash","caseSensitive":true}]},{"name":"senderID","unique":false,"properties":[{"name":"senderID","type":"Hash","caseSensitive":true}]}],"links":[]}',
   idName: 'id',
   propertyIds: {'convID': 0, 'senderID': 1, 'seq': 2},
   listProperties: {},
@@ -30,20 +30,20 @@ const RecordModelSchema = CollectionSchema(
   },
   linkIds: {},
   backlinkLinkNames: {},
-  getId: _recordModelGetId,
-  setId: _recordModelSetId,
-  getLinks: _recordModelGetLinks,
-  attachLinks: _recordModelAttachLinks,
-  serializeNative: _recordModelSerializeNative,
-  deserializeNative: _recordModelDeserializeNative,
-  deserializePropNative: _recordModelDeserializePropNative,
-  serializeWeb: _recordModelSerializeWeb,
-  deserializeWeb: _recordModelDeserializeWeb,
-  deserializePropWeb: _recordModelDeserializePropWeb,
+  getId: _readModelGetId,
+  setId: _readModelSetId,
+  getLinks: _readModelGetLinks,
+  attachLinks: _readModelAttachLinks,
+  serializeNative: _readModelSerializeNative,
+  deserializeNative: _readModelDeserializeNative,
+  deserializePropNative: _readModelDeserializePropNative,
+  serializeWeb: _readModelSerializeWeb,
+  deserializeWeb: _readModelDeserializeWeb,
+  deserializePropWeb: _readModelDeserializePropWeb,
   version: 3,
 );
 
-int? _recordModelGetId(RecordModel object) {
+int? _readModelGetId(ReadModel object) {
   if (object.id == Isar.autoIncrement) {
     return null;
   } else {
@@ -51,18 +51,18 @@ int? _recordModelGetId(RecordModel object) {
   }
 }
 
-void _recordModelSetId(RecordModel object, int id) {
+void _readModelSetId(ReadModel object, int id) {
   object.id = id;
 }
 
-List<IsarLinkBase> _recordModelGetLinks(RecordModel object) {
+List<IsarLinkBase> _readModelGetLinks(ReadModel object) {
   return [];
 }
 
-void _recordModelSerializeNative(
-    IsarCollection<RecordModel> collection,
+void _readModelSerializeNative(
+    IsarCollection<ReadModel> collection,
     IsarRawObject rawObj,
-    RecordModel object,
+    ReadModel object,
     int staticSize,
     List<int> offsets,
     AdapterAlloc alloc) {
@@ -86,12 +86,9 @@ void _recordModelSerializeNative(
   writer.writeLong(offsets[2], _seq);
 }
 
-RecordModel _recordModelDeserializeNative(
-    IsarCollection<RecordModel> collection,
-    int id,
-    IsarBinaryReader reader,
-    List<int> offsets) {
-  final object = RecordModel(
+ReadModel _readModelDeserializeNative(IsarCollection<ReadModel> collection,
+    int id, IsarBinaryReader reader, List<int> offsets) {
+  final object = ReadModel(
     convID: reader.readString(offsets[0]),
     senderID: reader.readString(offsets[1]),
     seq: reader.readLong(offsets[2]),
@@ -100,7 +97,7 @@ RecordModel _recordModelDeserializeNative(
   return object;
 }
 
-P _recordModelDeserializePropNative<P>(
+P _readModelDeserializePropNative<P>(
     int id, IsarBinaryReader reader, int propertyIndex, int offset) {
   switch (propertyIndex) {
     case -1:
@@ -116,8 +113,8 @@ P _recordModelDeserializePropNative<P>(
   }
 }
 
-dynamic _recordModelSerializeWeb(
-    IsarCollection<RecordModel> collection, RecordModel object) {
+dynamic _readModelSerializeWeb(
+    IsarCollection<ReadModel> collection, ReadModel object) {
   final jsObj = IsarNative.newJsObject();
   IsarNative.jsObjectSet(jsObj, 'convID', object.convID);
   IsarNative.jsObjectSet(jsObj, 'id', object.id);
@@ -126,9 +123,9 @@ dynamic _recordModelSerializeWeb(
   return jsObj;
 }
 
-RecordModel _recordModelDeserializeWeb(
-    IsarCollection<RecordModel> collection, dynamic jsObj) {
-  final object = RecordModel(
+ReadModel _readModelDeserializeWeb(
+    IsarCollection<ReadModel> collection, dynamic jsObj) {
+  final object = ReadModel(
     convID: IsarNative.jsObjectGet(jsObj, 'convID') ?? '',
     senderID: IsarNative.jsObjectGet(jsObj, 'senderID') ?? '',
     seq: IsarNative.jsObjectGet(jsObj, 'seq') ?? double.negativeInfinity,
@@ -137,7 +134,7 @@ RecordModel _recordModelDeserializeWeb(
   return object;
 }
 
-P _recordModelDeserializePropWeb<P>(Object jsObj, String propertyName) {
+P _readModelDeserializePropWeb<P>(Object jsObj, String propertyName) {
   switch (propertyName) {
     case 'convID':
       return (IsarNative.jsObjectGet(jsObj, 'convID') ?? '') as P;
@@ -153,28 +150,28 @@ P _recordModelDeserializePropWeb<P>(Object jsObj, String propertyName) {
   }
 }
 
-void _recordModelAttachLinks(IsarCollection col, int id, RecordModel object) {}
+void _readModelAttachLinks(IsarCollection col, int id, ReadModel object) {}
 
-extension RecordModelQueryWhereSort
-    on QueryBuilder<RecordModel, RecordModel, QWhere> {
-  QueryBuilder<RecordModel, RecordModel, QAfterWhere> anyId() {
+extension ReadModelQueryWhereSort
+    on QueryBuilder<ReadModel, ReadModel, QWhere> {
+  QueryBuilder<ReadModel, ReadModel, QAfterWhere> anyId() {
     return addWhereClauseInternal(const IdWhereClause.any());
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterWhere> anyConvID() {
+  QueryBuilder<ReadModel, ReadModel, QAfterWhere> anyConvID() {
     return addWhereClauseInternal(
         const IndexWhereClause.any(indexName: 'convID'));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterWhere> anySenderID() {
+  QueryBuilder<ReadModel, ReadModel, QAfterWhere> anySenderID() {
     return addWhereClauseInternal(
         const IndexWhereClause.any(indexName: 'senderID'));
   }
 }
 
-extension RecordModelQueryWhere
-    on QueryBuilder<RecordModel, RecordModel, QWhereClause> {
-  QueryBuilder<RecordModel, RecordModel, QAfterWhereClause> idEqualTo(int id) {
+extension ReadModelQueryWhere
+    on QueryBuilder<ReadModel, ReadModel, QWhereClause> {
+  QueryBuilder<ReadModel, ReadModel, QAfterWhereClause> idEqualTo(int id) {
     return addWhereClauseInternal(IdWhereClause.between(
       lower: id,
       includeLower: true,
@@ -183,8 +180,7 @@ extension RecordModelQueryWhere
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterWhereClause> idNotEqualTo(
-      int id) {
+  QueryBuilder<ReadModel, ReadModel, QAfterWhereClause> idNotEqualTo(int id) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(
         IdWhereClause.lessThan(upper: id, includeUpper: false),
@@ -200,22 +196,21 @@ extension RecordModelQueryWhere
     }
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterWhereClause> idGreaterThan(
-      int id,
+  QueryBuilder<ReadModel, ReadModel, QAfterWhereClause> idGreaterThan(int id,
       {bool include = false}) {
     return addWhereClauseInternal(
       IdWhereClause.greaterThan(lower: id, includeLower: include),
     );
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterWhereClause> idLessThan(int id,
+  QueryBuilder<ReadModel, ReadModel, QAfterWhereClause> idLessThan(int id,
       {bool include = false}) {
     return addWhereClauseInternal(
       IdWhereClause.lessThan(upper: id, includeUpper: include),
     );
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterWhereClause> idBetween(
+  QueryBuilder<ReadModel, ReadModel, QAfterWhereClause> idBetween(
     int lowerId,
     int upperId, {
     bool includeLower = true,
@@ -229,7 +224,7 @@ extension RecordModelQueryWhere
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterWhereClause> convIDEqualTo(
+  QueryBuilder<ReadModel, ReadModel, QAfterWhereClause> convIDEqualTo(
       String convID) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'convID',
@@ -237,7 +232,7 @@ extension RecordModelQueryWhere
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterWhereClause> convIDNotEqualTo(
+  QueryBuilder<ReadModel, ReadModel, QAfterWhereClause> convIDNotEqualTo(
       String convID) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
@@ -262,7 +257,7 @@ extension RecordModelQueryWhere
     }
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterWhereClause> senderIDEqualTo(
+  QueryBuilder<ReadModel, ReadModel, QAfterWhereClause> senderIDEqualTo(
       String senderID) {
     return addWhereClauseInternal(IndexWhereClause.equalTo(
       indexName: 'senderID',
@@ -270,7 +265,7 @@ extension RecordModelQueryWhere
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterWhereClause> senderIDNotEqualTo(
+  QueryBuilder<ReadModel, ReadModel, QAfterWhereClause> senderIDNotEqualTo(
       String senderID) {
     if (whereSortInternal == Sort.asc) {
       return addWhereClauseInternal(IndexWhereClause.lessThan(
@@ -296,9 +291,9 @@ extension RecordModelQueryWhere
   }
 }
 
-extension RecordModelQueryFilter
-    on QueryBuilder<RecordModel, RecordModel, QFilterCondition> {
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> convIDEqualTo(
+extension ReadModelQueryFilter
+    on QueryBuilder<ReadModel, ReadModel, QFilterCondition> {
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> convIDEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -310,8 +305,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition>
-      convIDGreaterThan(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> convIDGreaterThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -325,7 +319,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> convIDLessThan(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> convIDLessThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -339,7 +333,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> convIDBetween(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> convIDBetween(
     String lower,
     String upper, {
     bool caseSensitive = true,
@@ -356,8 +350,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition>
-      convIDStartsWith(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> convIDStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -369,7 +362,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> convIDEndsWith(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> convIDEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -381,7 +374,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> convIDContains(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> convIDContains(
       String value,
       {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
@@ -392,7 +385,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> convIDMatches(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> convIDMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
@@ -403,7 +396,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> idIsNull() {
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> idIsNull() {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.isNull,
       property: 'id',
@@ -411,7 +404,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> idEqualTo(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> idEqualTo(
       int value) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
@@ -420,7 +413,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> idGreaterThan(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> idGreaterThan(
     int value, {
     bool include = false,
   }) {
@@ -432,7 +425,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> idLessThan(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> idLessThan(
     int value, {
     bool include = false,
   }) {
@@ -444,7 +437,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> idBetween(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> idBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -459,7 +452,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> senderIDEqualTo(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> senderIDEqualTo(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -471,8 +464,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition>
-      senderIDGreaterThan(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> senderIDGreaterThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -486,8 +478,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition>
-      senderIDLessThan(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> senderIDLessThan(
     String value, {
     bool caseSensitive = true,
     bool include = false,
@@ -501,7 +492,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> senderIDBetween(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> senderIDBetween(
     String lower,
     String upper, {
     bool caseSensitive = true,
@@ -518,8 +509,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition>
-      senderIDStartsWith(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> senderIDStartsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -531,8 +521,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition>
-      senderIDEndsWith(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> senderIDEndsWith(
     String value, {
     bool caseSensitive = true,
   }) {
@@ -544,8 +533,9 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition>
-      senderIDContains(String value, {bool caseSensitive = true}) {
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> senderIDContains(
+      String value,
+      {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.contains,
       property: 'senderID',
@@ -554,7 +544,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> senderIDMatches(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> senderIDMatches(
       String pattern,
       {bool caseSensitive = true}) {
     return addFilterConditionInternal(FilterCondition(
@@ -565,7 +555,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> seqEqualTo(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> seqEqualTo(
       int value) {
     return addFilterConditionInternal(FilterCondition(
       type: ConditionType.eq,
@@ -574,7 +564,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> seqGreaterThan(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> seqGreaterThan(
     int value, {
     bool include = false,
   }) {
@@ -586,7 +576,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> seqLessThan(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> seqLessThan(
     int value, {
     bool include = false,
   }) {
@@ -598,7 +588,7 @@ extension RecordModelQueryFilter
     ));
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterFilterCondition> seqBetween(
+  QueryBuilder<ReadModel, ReadModel, QAfterFilterCondition> seqBetween(
     int lower,
     int upper, {
     bool includeLower = true,
@@ -614,115 +604,115 @@ extension RecordModelQueryFilter
   }
 }
 
-extension RecordModelQueryLinks
-    on QueryBuilder<RecordModel, RecordModel, QFilterCondition> {}
+extension ReadModelQueryLinks
+    on QueryBuilder<ReadModel, ReadModel, QFilterCondition> {}
 
-extension RecordModelQueryWhereSortBy
-    on QueryBuilder<RecordModel, RecordModel, QSortBy> {
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> sortByConvID() {
+extension ReadModelQueryWhereSortBy
+    on QueryBuilder<ReadModel, ReadModel, QSortBy> {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> sortByConvID() {
     return addSortByInternal('convID', Sort.asc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> sortByConvIDDesc() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> sortByConvIDDesc() {
     return addSortByInternal('convID', Sort.desc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> sortById() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> sortById() {
     return addSortByInternal('id', Sort.asc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> sortByIdDesc() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> sortByIdDesc() {
     return addSortByInternal('id', Sort.desc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> sortBySenderID() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> sortBySenderID() {
     return addSortByInternal('senderID', Sort.asc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> sortBySenderIDDesc() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> sortBySenderIDDesc() {
     return addSortByInternal('senderID', Sort.desc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> sortBySeq() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> sortBySeq() {
     return addSortByInternal('seq', Sort.asc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> sortBySeqDesc() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> sortBySeqDesc() {
     return addSortByInternal('seq', Sort.desc);
   }
 }
 
-extension RecordModelQueryWhereSortThenBy
-    on QueryBuilder<RecordModel, RecordModel, QSortThenBy> {
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> thenByConvID() {
+extension ReadModelQueryWhereSortThenBy
+    on QueryBuilder<ReadModel, ReadModel, QSortThenBy> {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> thenByConvID() {
     return addSortByInternal('convID', Sort.asc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> thenByConvIDDesc() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> thenByConvIDDesc() {
     return addSortByInternal('convID', Sort.desc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> thenById() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> thenById() {
     return addSortByInternal('id', Sort.asc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> thenByIdDesc() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> thenByIdDesc() {
     return addSortByInternal('id', Sort.desc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> thenBySenderID() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> thenBySenderID() {
     return addSortByInternal('senderID', Sort.asc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> thenBySenderIDDesc() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> thenBySenderIDDesc() {
     return addSortByInternal('senderID', Sort.desc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> thenBySeq() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> thenBySeq() {
     return addSortByInternal('seq', Sort.asc);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QAfterSortBy> thenBySeqDesc() {
+  QueryBuilder<ReadModel, ReadModel, QAfterSortBy> thenBySeqDesc() {
     return addSortByInternal('seq', Sort.desc);
   }
 }
 
-extension RecordModelQueryWhereDistinct
-    on QueryBuilder<RecordModel, RecordModel, QDistinct> {
-  QueryBuilder<RecordModel, RecordModel, QDistinct> distinctByConvID(
+extension ReadModelQueryWhereDistinct
+    on QueryBuilder<ReadModel, ReadModel, QDistinct> {
+  QueryBuilder<ReadModel, ReadModel, QDistinct> distinctByConvID(
       {bool caseSensitive = true}) {
     return addDistinctByInternal('convID', caseSensitive: caseSensitive);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QDistinct> distinctById() {
+  QueryBuilder<ReadModel, ReadModel, QDistinct> distinctById() {
     return addDistinctByInternal('id');
   }
 
-  QueryBuilder<RecordModel, RecordModel, QDistinct> distinctBySenderID(
+  QueryBuilder<ReadModel, ReadModel, QDistinct> distinctBySenderID(
       {bool caseSensitive = true}) {
     return addDistinctByInternal('senderID', caseSensitive: caseSensitive);
   }
 
-  QueryBuilder<RecordModel, RecordModel, QDistinct> distinctBySeq() {
+  QueryBuilder<ReadModel, ReadModel, QDistinct> distinctBySeq() {
     return addDistinctByInternal('seq');
   }
 }
 
-extension RecordModelQueryProperty
-    on QueryBuilder<RecordModel, RecordModel, QQueryProperty> {
-  QueryBuilder<RecordModel, String, QQueryOperations> convIDProperty() {
+extension ReadModelQueryProperty
+    on QueryBuilder<ReadModel, ReadModel, QQueryProperty> {
+  QueryBuilder<ReadModel, String, QQueryOperations> convIDProperty() {
     return addPropertyNameInternal('convID');
   }
 
-  QueryBuilder<RecordModel, int?, QQueryOperations> idProperty() {
+  QueryBuilder<ReadModel, int?, QQueryOperations> idProperty() {
     return addPropertyNameInternal('id');
   }
 
-  QueryBuilder<RecordModel, String, QQueryOperations> senderIDProperty() {
+  QueryBuilder<ReadModel, String, QQueryOperations> senderIDProperty() {
     return addPropertyNameInternal('senderID');
   }
 
-  QueryBuilder<RecordModel, int, QQueryOperations> seqProperty() {
+  QueryBuilder<ReadModel, int, QQueryOperations> seqProperty() {
     return addPropertyNameInternal('seq');
   }
 }

@@ -8,7 +8,7 @@ import 'package:im_lite_sdk_flutter/src/listener/msg_listener.dart';
 import 'package:im_lite_sdk_flutter/src/listener/unread_count_listener.dart';
 import 'package:im_lite_sdk_flutter/src/model/conv_model.dart';
 import 'package:im_lite_sdk_flutter/src/model/msg_model.dart';
-import 'package:im_lite_sdk_flutter/src/model/record_model.dart';
+import 'package:im_lite_sdk_flutter/src/model/read_model.dart';
 import 'package:im_lite_sdk_flutter/src/model/sdk_content.dart';
 import 'package:im_lite_sdk_flutter/src/tool/sdk_tool.dart';
 import 'package:isar/isar.dart';
@@ -61,13 +61,13 @@ class SDKManager {
     return isar.msgModels;
   }
 
-  /// 记录表
-  IsarCollection<RecordModel> recordModels() {
-    return isar.recordModels;
+  /// 已读表
+  IsarCollection<ReadModel> readModels() {
+    return isar.readModels;
   }
 
   /// 拉取会话
-  void pullConv(ConvDataList? convList) async {
+  void onPullConv(ConvDataList? convList) async {
     if (convList == null) return;
     List<PullMsg> pullList = [];
     await isar.writeTxn((isar) async {
@@ -84,10 +84,9 @@ class SDKManager {
       await _calculateUnreadCount();
     });
     if (pullList.isNotEmpty) {
-      IMLiteCore.instance.pullMsgList(
-        pullList: PullMsgList(
-          list: pullList,
-        ),
+      await pullMsgList(
+        isAutoPull: true,
+        pullList: pullList,
       );
     }
   }
@@ -137,17 +136,32 @@ class SDKManager {
   }
 
   /// 拉取消息
-  void pullMsg(MsgDataList? msgList) async {
-    if (msgList == null) return;
-    await isar.writeTxn((isar) async {
-      for (MsgData msg in msgList.list) {
-        await _handleMsg(msg);
-      }
-    });
+  Future<List<MsgModel>> pullMsgList({
+    required bool isAutoPull,
+    required List<PullMsg> pullList,
+  }) async {
+    MsgDataList? msgList = await IMLiteCore.instance.pullMsgList(
+      pullList: PullMsgList(list: pullList),
+    );
+    List<MsgModel> list = [];
+    if (msgList != null) {
+      await isar.writeTxn((isar) async {
+        for (MsgData msg in msgList.list) {
+          MsgModel msgModel = MsgModel.fromProtobuf(msg);
+          list.add(msgModel);
+          if (isAutoPull) {
+            await _handleMsg(msg);
+          } else {
+            await _updateMsg(msgModel);
+          }
+        }
+      });
+    }
+    return list;
   }
 
   /// 推送消息
-  void pushMsg(MsgData msg) async {
+  void onPushMsg(MsgData msg) async {
     await isar.writeTxn((isar) async {
       await _handleMsg(msg);
     });
@@ -158,58 +172,65 @@ class SDKManager {
     if (msg.serverMsgID.isEmpty) return;
     MsgModel msgModel = MsgModel.fromProtobuf(msg);
     msgModel.sendStatus = SendStatus.success;
-    MsgOptionsModel msgOptions = msgModel.msgOptions;
-    bool storage = msgOptions.storage;
-    bool unread = msgOptions.unread;
-    if (storage) {
-      MsgModel? model = await msgModels()
-          .filter()
-          .clientMsgIDEqualTo(
-            msgModel.clientMsgID,
-          )
-          .findFirst();
-      if (model != null) {
-        if (model.seq != 0) {
-          if (msgModel.seq > model.seq) {
-            model.contentType = msgModel.contentType;
-            model.content = msgModel.content;
-            await msgModels().put(model);
-          }
-        } else {
-          model.serverMsgID = msgModel.serverMsgID;
+    _updateMsg(msgModel);
+    msgListener?.receive(msgModel);
+    ReadModel? readModel = await _updateRead(msgModel);
+    _updateConv(msgModel, readModel);
+  }
+
+  Future _updateMsg(MsgModel msgModel) async {
+    if (!msgModel.msgOptions.storage) return;
+    MsgModel? model = await msgModels()
+        .filter()
+        .clientMsgIDEqualTo(
+          msgModel.clientMsgID,
+        )
+        .findFirst();
+    if (model != null) {
+      if (model.seq != 0) {
+        if (msgModel.seq > model.seq) {
           model.contentType = msgModel.contentType;
           model.content = msgModel.content;
-          model.seq = msgModel.seq;
-          model.serverTime = msgModel.serverTime;
           await msgModels().put(model);
         }
       } else {
-        await msgModels().put(msgModel);
+        model.serverMsgID = msgModel.serverMsgID;
+        model.contentType = msgModel.contentType;
+        model.content = msgModel.content;
+        model.seq = msgModel.seq;
+        model.serverTime = msgModel.serverTime;
+        await msgModels().put(model);
       }
+    } else {
+      await msgModels().put(msgModel);
     }
-    msgListener?.receive(msgModel);
-    RecordModel? recordModel;
-    if (msgModel.contentType == ContentType.read) {
-      ReadContent content = ReadContent.fromJson(msgModel.content);
-      recordModel = await recordModels()
-          .filter()
-          .senderIDEqualTo(msgModel.senderID)
-          .convIDEqualTo(msgModel.convID)
-          .findFirst();
-      if (recordModel != null) {
-        if (content.seq > recordModel.seq) {
-          recordModel.seq = content.seq;
-          await recordModels().put(recordModel);
-        }
-      } else {
-        recordModel = RecordModel(
-          senderID: msgModel.senderID,
-          convID: msgModel.convID,
-          seq: content.seq,
-        );
-        await recordModels().put(recordModel);
+  }
+
+  Future<ReadModel?> _updateRead(MsgModel msgModel) async {
+    if (msgModel.contentType != ContentType.read) return null;
+    ReadContent content = ReadContent.fromJson(msgModel.content);
+    ReadModel? readModel = await readModels()
+        .filter()
+        .senderIDEqualTo(msgModel.senderID)
+        .convIDEqualTo(msgModel.convID)
+        .findFirst();
+    if (readModel != null) {
+      if (content.seq > readModel.seq) {
+        readModel.seq = content.seq;
+        await readModels().put(readModel);
       }
+    } else {
+      readModel = ReadModel(
+        senderID: msgModel.senderID,
+        convID: msgModel.convID,
+        seq: content.seq,
+      );
+      await readModels().put(readModel);
     }
+    return readModel;
+  }
+
+  Future _updateConv(MsgModel msgModel, ReadModel? readModel) async {
     ConvModel? convModel = await convModels()
         .filter()
         .convIDEqualTo(
@@ -217,17 +238,19 @@ class SDKManager {
         )
         .findFirst();
     if (convModel != null) {
-      convModel.maxSeq = msgModel.seq;
-      if (msgModel.contentType >= ContentType.text) {
-        convModel.msgModel = msgModel;
-        convModel.msgTime = msgModel.serverTime;
+      if (msgModel.seq > convModel.maxSeq) {
+        convModel.maxSeq = msgModel.seq;
       }
-      if (recordModel != null) {
-        int unreadCount = convModel.maxSeq - recordModel.seq;
+      if (readModel != null) {
+        int unreadCount = convModel.maxSeq - readModel.seq;
         convModel.unreadCount = unreadCount > 0 ? unreadCount : 0;
       }
-      if (unread && msgModel.senderID != userID) {
+      if (msgModel.msgOptions.unread && msgModel.senderID != userID) {
         convModel.unreadCount = ++convModel.unreadCount;
+      }
+      if (msgModel.msgOptions.updateConv) {
+        convModel.msgModel = msgModel;
+        convModel.msgTime = msgModel.serverTime;
       }
       await convModels().put(convModel);
       convListener?.update();
@@ -266,30 +289,15 @@ class SDKManager {
   }
 
   /// 发送消息
-  void sendMsg({
+  Future<bool> sendMsg({
     required MsgModel msgModel,
-    Function()? onSuccess,
-    Function()? onError,
   }) async {
-    bool storage = msgModel.msgOptions.storage;
-    if (storage) {
+    if (msgModel.msgOptions.storage) {
       await isar.writeTxn((isar) async {
         await msgModels().put(msgModel);
-        ConvModel? convModel = await convModels()
-            .filter()
-            .convIDEqualTo(
-              msgModel.convID,
-            )
-            .findFirst();
-        if (convModel != null) {
-          convModel.msgModel = msgModel;
-          convModel.msgTime = msgModel.serverTime;
-          await convModels().put(convModel);
-          convListener?.update();
-        }
       });
     }
-    IMLiteCore.instance.sendMsg(
+    bool sendStatus = await IMLiteCore.instance.sendMsg(
       msg: MsgData(
         clientMsgID: msgModel.clientMsgID,
         senderID: userID,
@@ -308,62 +316,25 @@ class SDKManager {
         msgOptions: MsgOptions(
           storage: msgModel.msgOptions.storage,
           unread: msgModel.msgOptions.unread,
+          updateConv: msgModel.msgOptions.updateConv,
         ),
       ),
-      onSuccess: (data) async {
-        if (storage) {
-          await isar.writeTxn((isar) async {
-            msgModel.sendStatus = SendStatus.success;
-            await msgModels().put(msgModel);
-          });
-        }
-        if (onSuccess != null) onSuccess();
-      },
-      onError: (error) async {
-        if (storage) {
-          await isar.writeTxn((isar) async {
-            msgModel.sendStatus = SendStatus.failed;
-            await msgModels().put(msgModel);
-          });
-        }
-        if (onError != null) onError();
-      },
     );
-  }
-
-  /// 更新消息
-  void updateMsg({
-    required MsgModel msgModel,
-    Function()? onSuccess,
-    Function()? onError,
-  }) {
-    IMLiteCore.instance.sendMsg(
-      msg: MsgData(
-        clientMsgID: msgModel.clientMsgID,
-        senderID: userID,
-        convID: msgModel.convID,
-        contentType: msgModel.contentType,
-        content: utf8.encode(msgModel.content),
-        clientTime: Int64(msgModel.clientTime),
-        offlinePush: OfflinePush(
-          title: msgModel.offlinePush.title,
-          desc: msgModel.offlinePush.desc,
-          ex: msgModel.offlinePush.ex,
-          iOSPushSound: msgModel.offlinePush.iOSPushSound,
-          iOSBadgeCount: msgModel.offlinePush.iOSBadgeCount,
-          userIDs: msgModel.offlinePush.userIDs,
-        ),
-        msgOptions: MsgOptions(
-          storage: msgModel.msgOptions.storage,
-          unread: msgModel.msgOptions.unread,
-        ),
-      ),
-      onSuccess: (data) async {
-        if (onSuccess != null) onSuccess();
-      },
-      onError: (error) async {
-        if (onError != null) onError();
-      },
-    );
+    if (sendStatus) {
+      if (msgModel.msgOptions.storage) {
+        await isar.writeTxn((isar) async {
+          msgModel.sendStatus = SendStatus.success;
+          await msgModels().put(msgModel);
+        });
+      }
+    } else {
+      if (msgModel.msgOptions.storage) {
+        await isar.writeTxn((isar) async {
+          msgModel.sendStatus = SendStatus.failed;
+          await msgModels().put(msgModel);
+        });
+      }
+    }
+    return sendStatus;
   }
 }

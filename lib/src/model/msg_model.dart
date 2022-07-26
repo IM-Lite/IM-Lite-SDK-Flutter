@@ -154,16 +154,19 @@ class OfflinePushModel {
 class MsgOptionsModel {
   bool storage;
   bool unread;
+  bool updateConv;
 
   MsgOptionsModel({
     required this.storage,
     required this.unread,
+    required this.updateConv,
   });
 
   static MsgOptionsModel fromProtobuf(MsgOptions msgOptions) {
     return MsgOptionsModel(
       storage: msgOptions.storage,
       unread: msgOptions.unread,
+      updateConv: msgOptions.updateConv,
     );
   }
 
@@ -172,6 +175,7 @@ class MsgOptionsModel {
     return MsgOptionsModel(
       storage: map["storage"],
       unread: map["unread"],
+      updateConv: map["updateConv"],
     );
   }
 
@@ -179,6 +183,7 @@ class MsgOptionsModel {
     return json.encode({
       "storage": storage,
       "unread": unread,
+      "updateConv": updateConv,
     });
   }
 }

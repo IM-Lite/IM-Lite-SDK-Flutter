@@ -1,7 +1,9 @@
+import 'package:im_lite_core_flutter/im_lite_core_flutter.dart';
 import 'package:im_lite_sdk_flutter/src/constant/content_type.dart';
 import 'package:im_lite_sdk_flutter/src/manager/sdk_manager.dart';
 import 'package:im_lite_sdk_flutter/src/model/msg_model.dart';
 import 'package:im_lite_sdk_flutter/src/model/sdk_content.dart';
+import 'package:im_lite_sdk_flutter/src/tool/sdk_tool.dart';
 import 'package:isar/isar.dart';
 
 class MsgManager {
@@ -15,7 +17,7 @@ class MsgManager {
     int? offset,
     int? limit,
   }) async {
-    return await getCustomList(
+    return await getCustomMsgList(
       filter: FilterGroup.and([
         FilterCondition(
           type: ConditionType.eq,
@@ -35,7 +37,7 @@ class MsgManager {
   }
 
   /// 获取自定义列表
-  Future<List<MsgModel>> getCustomList({
+  Future<List<MsgModel>> getCustomMsgList({
     List<WhereClause> whereClauses = const [],
     bool whereDistinct = false,
     Sort whereSort = Sort.asc,
@@ -62,98 +64,111 @@ class MsgManager {
         .findAll();
   }
 
+  /// 获取云端列表
+  Future<List<MsgModel>> getCloudMsgList({
+    required String convID,
+    required int startSeq,
+    required int size,
+  }) async {
+    int maxSeq = startSeq;
+    int minSeq = startSeq - size;
+    minSeq = minSeq < 0 ? 0 : minSeq;
+    PullMsg pull = PullMsg(
+      convID: convID,
+      seqList: SDKTool.generateSeqList(maxSeq, minSeq),
+    );
+    return await _sdkManager.pullMsgList(
+      isAutoPull: false,
+      pullList: [pull],
+    );
+  }
+
   /// 发送正在输入
-  void sendTyping({
+  Future<bool> sendTyping({
     required String convID,
     required TypingContent content,
     Function()? onSuccess,
     Function()? onError,
   }) {
-    MsgModel msgModel = _sdkManager.createMsg(
-      convID: convID,
-      contentType: ContentType.typing,
-      content: content.toJson(),
-      offlinePush: OfflinePushModel(
-        title: "",
-        desc: "",
-        ex: "",
-        iOSPushSound: "",
-        iOSBadgeCount: false,
-        userIDs: [],
+    return sendMsg(
+      msgModel: _sdkManager.createMsg(
+        convID: convID,
+        contentType: ContentType.typing,
+        content: content.toJson(),
+        offlinePush: OfflinePushModel(
+          title: "",
+          desc: "",
+          ex: "",
+          iOSPushSound: "",
+          iOSBadgeCount: false,
+          userIDs: [],
+        ),
+        msgOptions: MsgOptionsModel(
+          storage: false,
+          unread: false,
+          updateConv: false,
+        ),
       ),
-      msgOptions: MsgOptionsModel(
-        storage: false,
-        unread: false,
-      ),
-    );
-    sendMsg(
-      msgModel: msgModel,
-      onSuccess: onSuccess,
-      onError: onError,
     );
   }
 
   /// 发送已读消息
-  void sendRead({
+  Future<bool> sendRead({
     required String convID,
     required ReadContent content,
     Function()? onSuccess,
     Function()? onError,
   }) {
-    MsgModel msgModel = _sdkManager.createMsg(
-      convID: convID,
-      contentType: ContentType.read,
-      content: content.toJson(),
-      offlinePush: OfflinePushModel(
-        title: "",
-        desc: "",
-        ex: "",
-        iOSPushSound: "",
-        iOSBadgeCount: false,
-        userIDs: [],
+    return sendMsg(
+      msgModel: _sdkManager.createMsg(
+        convID: convID,
+        contentType: ContentType.read,
+        content: content.toJson(),
+        offlinePush: OfflinePushModel(
+          title: "",
+          desc: "",
+          ex: "",
+          iOSPushSound: "",
+          iOSBadgeCount: false,
+          userIDs: [],
+        ),
+        msgOptions: MsgOptionsModel(
+          storage: true,
+          unread: false,
+          updateConv: false,
+        ),
       ),
-      msgOptions: MsgOptionsModel(
-        storage: false,
-        unread: false,
-      ),
-    );
-    sendMsg(
-      msgModel: msgModel,
-      onSuccess: onSuccess,
-      onError: onError,
     );
   }
 
   /// 发送撤回消息
-  void sendRevoke({
+  Future<bool> sendRevoke({
     required String clientMsgID,
     required String convID,
     required RevokeContent content,
     Function()? onSuccess,
     Function()? onError,
   }) {
-    MsgModel msgModel = _sdkManager.createMsg(
-      clientMsgID: clientMsgID,
-      convID: convID,
-      contentType: ContentType.revoke,
-      content: content.toJson(),
-      offlinePush: OfflinePushModel(
-        title: "",
-        desc: "",
-        ex: "",
-        iOSPushSound: "",
-        iOSBadgeCount: false,
-        userIDs: [],
+    return sendMsg(
+      msgModel: _sdkManager.createMsg(
+        clientMsgID: clientMsgID,
+        convID: convID,
+        contentType: ContentType.revoke,
+        content: content.toJson(),
+        offlinePush: OfflinePushModel(
+          title: "",
+          desc: "",
+          ex: "",
+          iOSPushSound: "",
+          iOSBadgeCount: false,
+          userIDs: [],
+        ),
+        msgOptions: MsgOptionsModel(
+          storage: true,
+          unread: false,
+          updateConv: true,
+        ),
       ),
-      msgOptions: MsgOptionsModel(
-        storage: true,
-        unread: false,
-      ),
-    );
-    sendMsg(
-      msgModel: msgModel,
-      onSuccess: onSuccess,
-      onError: onError,
     );
   }
 
@@ -171,6 +186,7 @@ class MsgManager {
       msgOptions: MsgOptionsModel(
         storage: true,
         unread: true,
+        updateConv: true,
       ),
     );
   }
@@ -189,6 +205,7 @@ class MsgManager {
       msgOptions: MsgOptionsModel(
         storage: true,
         unread: true,
+        updateConv: true,
       ),
     );
   }
@@ -207,6 +224,7 @@ class MsgManager {
       msgOptions: MsgOptionsModel(
         storage: true,
         unread: true,
+        updateConv: true,
       ),
     );
   }
@@ -225,6 +243,7 @@ class MsgManager {
       msgOptions: MsgOptionsModel(
         storage: true,
         unread: true,
+        updateConv: true,
       ),
     );
   }
@@ -243,12 +262,14 @@ class MsgManager {
       msgOptions: MsgOptionsModel(
         storage: true,
         unread: true,
+        updateConv: true,
       ),
     );
   }
 
   /// 创建自定义消息
   MsgModel createCustom({
+    String? clientMsgID,
     required String convID,
     required int contentType,
     required String content,
@@ -257,6 +278,7 @@ class MsgManager {
   }) {
     assert(contentType > ContentType.file);
     return _sdkManager.createMsg(
+      clientMsgID: clientMsgID,
       convID: convID,
       contentType: contentType,
       content: content,
@@ -266,15 +288,11 @@ class MsgManager {
   }
 
   /// 发送消息
-  void sendMsg({
+  Future<bool> sendMsg({
     required MsgModel msgModel,
-    Function()? onSuccess,
-    Function()? onError,
   }) {
-    _sdkManager.sendMsg(
+    return _sdkManager.sendMsg(
       msgModel: msgModel,
-      onSuccess: onSuccess,
-      onError: onError,
     );
   }
 

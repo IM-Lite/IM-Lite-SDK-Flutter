@@ -15,10 +15,10 @@ class ConvModel {
   String convID;
   int maxSeq;
   int minSeq;
+  int unreadCount;
   @MsgConverter()
   MsgModel? msgModel;
   int msgTime;
-  int unreadCount;
   @DraftConverter()
   DraftModel? draftModel;
   bool isPinned;
@@ -27,9 +27,9 @@ class ConvModel {
     required this.convID,
     required this.maxSeq,
     required this.minSeq,
+    this.unreadCount = 0,
     this.msgModel,
     this.msgTime = 0,
-    this.unreadCount = 0,
     this.draftModel,
     this.isPinned = false,
   });

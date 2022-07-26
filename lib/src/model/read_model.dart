@@ -1,9 +1,9 @@
 import 'package:isar/isar.dart';
 
-part 'record_model.g.dart';
+part 'read_model.g.dart';
 
 @Collection()
-class RecordModel {
+class ReadModel {
   @Id()
   int? id;
 
@@ -13,7 +13,7 @@ class RecordModel {
   String convID;
   int seq;
 
-  RecordModel({
+  ReadModel({
     required this.senderID,
     required this.convID,
     required this.seq,

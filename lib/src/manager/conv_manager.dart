@@ -12,7 +12,7 @@ class ConvManager {
 
   /// 获取列表
   Future<List<ConvModel>> getConvList() async {
-    return getCustomList(
+    return getCustomConvList(
       sortBy: [
         const SortProperty(
           property: "isPinned",
@@ -31,7 +31,7 @@ class ConvManager {
   }
 
   /// 获取自定义列表
-  Future<List<ConvModel>> getCustomList({
+  Future<List<ConvModel>> getCustomConvList({
     List<WhereClause> whereClauses = const [],
     bool whereDistinct = false,
     Sort whereSort = Sort.asc,

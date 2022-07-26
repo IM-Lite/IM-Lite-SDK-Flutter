@@ -49,11 +49,10 @@ class IMLiteSDK {
       autoPullTime: autoPullTime,
       connectListener: connectListener,
       receiveConvListener: ReceiveConvListener(
-        onPullConv: _sdkManager!.pullConv,
+        onPullConv: _sdkManager!.onPullConv,
       ),
       receiveMsgListener: ReceiveMsgListener(
-        onPullMsg: _sdkManager!.pullMsg,
-        onPushMsg: _sdkManager!.pushMsg,
+        onPushMsg: _sdkManager!.onPushMsg,
       ),
     );
   }
