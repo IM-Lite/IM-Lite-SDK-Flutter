@@ -11,7 +11,7 @@ class ConvManager {
   ConvManager(this._sdkManager, this._msgManager);
 
   /// 获取列表
-  Future<List<ConvModel>> getConvList() async {
+  Future<List<ConvModel>> getConvList() {
     return getCustomConvList(
       sortBy: [
         const SortProperty(
@@ -41,8 +41,8 @@ class ConvManager {
     int? offset,
     int? limit,
     String? property,
-  }) async {
-    return await _sdkManager
+  }) {
+    return _sdkManager
         .convModels()
         .buildQuery<ConvModel>(
           whereClauses: whereClauses,
@@ -151,7 +151,7 @@ class ConvManager {
   }
 
   /// 未读数量
-  Future<int> getUnreadCount() async {
-    return await _sdkManager.convModels().where().unreadCountProperty().sum();
+  Future<int> getUnreadCount() {
+    return _sdkManager.convModels().where().unreadCountProperty().sum();
   }
 }

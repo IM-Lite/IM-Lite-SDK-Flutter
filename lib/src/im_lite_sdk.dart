@@ -27,7 +27,7 @@ class IMLiteSDK {
     required String apiUrl,
     required String wsUrl,
     Duration autoPullTime = const Duration(seconds: 30),
-    int pullMsgCount = 200,
+    int pullMsgCount = 100,
     bool isarInspector = false,
     ConnectListener? connectListener,
     ConvListener? convListener,

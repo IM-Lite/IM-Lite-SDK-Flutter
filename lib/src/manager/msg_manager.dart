@@ -16,8 +16,8 @@ class MsgManager {
     required String convID,
     int? offset,
     int? limit,
-  }) async {
-    return await getCustomMsgList(
+  }) {
+    return getCustomMsgList(
       filter: FilterGroup.and([
         FilterCondition(
           type: ConditionType.eq,
@@ -47,8 +47,8 @@ class MsgManager {
     int? offset,
     int? limit,
     String? property,
-  }) async {
-    return await _sdkManager
+  }) {
+    return _sdkManager
         .msgModels()
         .buildQuery<MsgModel>(
           whereClauses: whereClauses,
@@ -67,17 +67,17 @@ class MsgManager {
   /// 获取云端列表
   Future<List<MsgModel>> getCloudMsgList({
     required String convID,
-    required int startSeq,
-    required int size,
-  }) async {
-    int maxSeq = startSeq;
-    int minSeq = startSeq - size;
+    required int seq,
+    int size = 20,
+  }) {
+    int maxSeq = seq;
+    int minSeq = maxSeq - size;
     minSeq = minSeq < 0 ? 0 : minSeq;
     PullMsg pull = PullMsg(
       convID: convID,
       seqList: SDKTool.generateSeqList(maxSeq, minSeq),
     );
-    return await _sdkManager.pullMsgList(
+    return _sdkManager.pullMsgList(
       isAutoPull: false,
       pullList: [pull],
     );
@@ -87,8 +87,6 @@ class MsgManager {
   Future<bool> sendTyping({
     required String convID,
     required TypingContent content,
-    Function()? onSuccess,
-    Function()? onError,
   }) {
     return sendMsg(
       msgModel: _sdkManager.createMsg(
@@ -116,8 +114,6 @@ class MsgManager {
   Future<bool> sendRead({
     required String convID,
     required ReadContent content,
-    Function()? onSuccess,
-    Function()? onError,
   }) {
     return sendMsg(
       msgModel: _sdkManager.createMsg(
@@ -146,8 +142,6 @@ class MsgManager {
     required String clientMsgID,
     required String convID,
     required RevokeContent content,
-    Function()? onSuccess,
-    Function()? onError,
   }) {
     return sendMsg(
       msgModel: _sdkManager.createMsg(
@@ -317,7 +311,7 @@ class MsgManager {
     return false;
   }
 
-  /// 清空本地消息
+  /// 清空消息
   Future<bool> clearMsg({
     required String convID,
   }) async {
